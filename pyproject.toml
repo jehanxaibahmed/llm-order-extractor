@@ -19,6 +19,9 @@ dependencies = [
     "python-multipart>=0.0.9",
 ]
 
+[project.scripts]
+order-extractor = "order_extractor.entrypoints.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",

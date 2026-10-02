@@ -9,6 +9,14 @@ description = "Turn unstructured order emails and PDFs into validated, structure
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Jahanzaib Ahmad" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Framework :: FastAPI",
+]
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",

@@ -17,6 +17,9 @@ class LLMResponse:
 
 
 class LLMClient(Protocol):
+    model: str
+    """The configured model name, reported when no call is made."""
+
     async def extract(self, system: str, user: str, schema: dict[str, Any]) -> LLMResponse:
         """Send the prompts and return raw text that should match ``schema`` (a JSON schema)."""
         ...

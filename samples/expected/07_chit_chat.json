@@ -1,0 +1,30 @@
+{
+  "source": "emails/07_chit_chat.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Fresh Farm Ltd",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-20",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "Bramley apples",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      },
+      {
+        "product_description": "Conference pears",
+        "quantity": 1,
+        "quantity_text": "1",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

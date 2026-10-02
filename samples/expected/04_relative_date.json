@@ -1,0 +1,30 @@
+{
+  "source": "emails/04_relative_date.eml",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Oak & Ember",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-06",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "coriander",
+        "quantity": 6,
+        "quantity_text": "6",
+        "quantity_is_estimate": false,
+        "unit": "bunch",
+        "notes": null
+      },
+      {
+        "product_description": "avocados",
+        "quantity": 3,
+        "quantity_text": "3",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": "ripe please"
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

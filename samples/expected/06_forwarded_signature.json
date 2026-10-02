@@ -1,0 +1,30 @@
+{
+  "source": "emails/06_forwarded_signature.eml",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Little Fig Bakery",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-07",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "strong white flour",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "sack",
+        "notes": "16kg"
+      },
+      {
+        "product_description": "strawberries",
+        "quantity": 3,
+        "quantity_text": "3",
+        "quantity_is_estimate": false,
+        "unit": "tray",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

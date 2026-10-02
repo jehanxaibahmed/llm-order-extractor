@@ -1,0 +1,22 @@
+{
+  "source": "emails/01_simple.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Green Leaf Café",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-02",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "vine tomatoes",
+        "quantity": 3,
+        "quantity_text": "3",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

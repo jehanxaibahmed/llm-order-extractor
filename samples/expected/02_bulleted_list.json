@@ -1,0 +1,46 @@
+{
+  "source": "emails/02_bulleted_list.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "The Copper Pot",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-05",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "iceberg lettuce",
+        "quantity": 4,
+        "quantity_text": "4 x",
+        "quantity_is_estimate": false,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "shallots",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "kg",
+        "notes": null
+      },
+      {
+        "product_description": "lemons",
+        "quantity": 10,
+        "quantity_text": "10",
+        "quantity_is_estimate": false,
+        "unit": null,
+        "notes": null
+      },
+      {
+        "product_description": "micro herbs",
+        "quantity": 1,
+        "quantity_text": "1",
+        "quantity_is_estimate": false,
+        "unit": "tray",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

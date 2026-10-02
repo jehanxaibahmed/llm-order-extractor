@@ -1,0 +1,59 @@
+{
+  "source": "pdfs/11_two_page_po.pdf",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Oak & Ember",
+    "customer_reference": "OE-5530",
+    "requested_delivery_date": "2026-09-28",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "Jersey Royal potatoes",
+        "quantity": 5,
+        "quantity_text": "5",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      },
+      {
+        "product_description": "Little Gem lettuce",
+        "quantity": 3,
+        "quantity_text": "3",
+        "quantity_is_estimate": false,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "Fresh ginger",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "kg",
+        "notes": null
+      },
+      {
+        "product_description": "Thai basil",
+        "quantity": 4,
+        "quantity_text": "4",
+        "quantity_is_estimate": false,
+        "unit": "bunch",
+        "notes": null
+      },
+      {
+        "product_description": "Limes",
+        "quantity": 1,
+        "quantity_text": "1",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      }
+    ],
+    "notes": "Please call Leo on arrival, side gate is locked before 10am."
+  },
+  "issues": [
+    {
+      "field": "requested_delivery_date",
+      "severity": "warning"
+    }
+  ]
+}

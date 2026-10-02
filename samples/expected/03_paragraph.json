@@ -1,0 +1,38 @@
+{
+  "source": "emails/03_paragraph.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Riverside Bistro",
+    "customer_reference": null,
+    "requested_delivery_date": null,
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "red peppers",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      },
+      {
+        "product_description": "basil",
+        "quantity": 1,
+        "quantity_text": "a",
+        "quantity_is_estimate": false,
+        "unit": "tray",
+        "notes": null
+      },
+      {
+        "product_description": "new potatoes",
+        "quantity": 5,
+        "quantity_text": "5",
+        "quantity_is_estimate": false,
+        "unit": "kg",
+        "notes": "if you have them"
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

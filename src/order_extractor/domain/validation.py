@@ -5,7 +5,7 @@ Rules return issues instead of raising, so the caller always gets a result it ca
 
 from datetime import date
 
-from order_extractor.schemas import Order, ValidationIssue
+from order_extractor.domain.models import Order, ValidationIssue
 
 QUANTITY_WARNING_THRESHOLD = 500
 MAX_DAYS_AHEAD = 60

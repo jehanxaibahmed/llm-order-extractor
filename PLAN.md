@@ -40,46 +40,81 @@ This is a public portfolio project: **use synthetic sample data only** — nothi
 
 ---
 
-## 3. Folder structure
+## 3. Architecture and folder structure
+
+The code follows **ports and adapters** (hexagonal / clean architecture). Dependencies point
+inwards only:
+
+```
+entrypoints  ──►  adapters  ──►  application  ──►  domain
+ (API, CLI)       (OpenAI,       (use case,        (models,
+                   parsers)       prompts, ports)   rules)
+```
+
+| Layer | Contains | May import |
+|---|---|---|
+| `domain/` | Pydantic models, validation rules | nothing else in the package; no I/O libraries |
+| `application/` | `ExtractOrder` use case, prompts, **ports** (`LLMClient`, `DocumentParser` protocols) | `domain` |
+| `adapters/` | concrete implementations of the ports: OpenAI/OpenRouter/Fake LLM clients, text/.eml/PDF parsers | `domain`, `application`, `config` |
+| `entrypoints/` | FastAPI app, CLI — the **composition root** that builds adapters and injects them | everything |
+
+Patterns used:
+- **Ports and adapters** — the use case depends on protocols, never on `openai` or `pypdf`
+- **Strategy** — LLM providers and document parsers are interchangeable implementations of a port
+- **Factory** — `create_llm_client(settings)` picks OpenAI / OpenRouter / Fake from config
+- **Registry** — `get_parser(filename)` picks a parser by file extension
+- **Dependency injection** — `ExtractOrder(llm=...)` receives its client; the API wires it with
+  FastAPI `Depends`, so tests swap in `FakeLLM` without patching
+
+`tests/test_architecture.py` reads every module's imports and fails if a layer breaks these rules.
 
 ```
 llm-order-extractor/
 ├── README.md
 ├── PLAN.md
 ├── pyproject.toml
-├── .env.example                # OPENAI_API_KEY=, OPENROUTER_API_KEY=, LLM_PROVIDER=openai, LLM_MODEL=gpt-4o-mini
-├── .gitignore                  # .env, __pycache__, .venv
+├── .env.example                    # OPENAI_API_KEY=, OPENROUTER_API_KEY=, LLM_PROVIDER=openai, LLM_MODEL=gpt-4o-mini
+├── .gitignore                      # .env, __pycache__, .venv
 ├── src/order_extractor/
 │   ├── __init__.py
-│   ├── schemas.py              # Pydantic models
-│   ├── parsing.py              # email / .eml / PDF → plain text
-│   ├── prompts.py              # system + user prompt templates
-│   ├── llm.py                  # provider interface + OpenAI/OpenRouter clients + fake client
-│   ├── extractor.py            # orchestrates: text → LLM → parse → validate
-│   ├── validation.py           # business rules → ValidationReport
-│   ├── api.py                  # FastAPI app
-│   └── cli.py                  # `python -m order_extractor.cli path/to/file`
+│   ├── config.py                   # Settings from env / .env
+│   ├── domain/
+│   │   ├── models.py               # Order, OrderLine, ValidationIssue, ExtractionResult
+│   │   └── validation.py           # business rules → list[ValidationIssue]
+│   ├── application/
+│   │   ├── ports.py                # LLMClient, DocumentParser protocols; LLMResponse
+│   │   ├── prompts.py              # system + user prompt templates
+│   │   └── extract_order.py        # ExtractOrder use case: text → LLM → parse → validate
+│   ├── adapters/
+│   │   ├── llm/
+│   │   │   ├── __init__.py         # create_llm_client(settings) factory
+│   │   │   ├── schema.py           # to_strict_schema() for OpenAI strict mode
+│   │   │   ├── openai_client.py    # OpenAIClient, OpenRouterClient (same SDK, different base_url)
+│   │   │   └── fake.py             # FakeLLM for tests
+│   │   └── parsing/
+│   │       ├── __init__.py         # get_parser(filename) registry
+│   │       ├── email.py            # .txt and .eml
+│   │       └── pdf.py              # text-based PDF via pypdf
+│   └── entrypoints/
+│       ├── api.py                  # FastAPI app
+│       └── cli.py                  # `python -m order_extractor.entrypoints.cli path/to/file`
 ├── samples/
-│   ├── emails/                 # 8–10 synthetic .txt / .eml files
-│   ├── pdfs/                   # 2–3 synthetic PDFs
-│   └── expected/               # expected JSON for each sample (ground truth)
-├── tests/
-│   ├── test_schemas.py
-│   ├── test_parsing.py
-│   ├── test_validation.py
-│   ├── test_extractor.py       # uses FakeLLM, no network
-│   └── test_api.py
+│   ├── emails/                     # 8–10 synthetic .txt / .eml files
+│   ├── pdfs/                       # 2–3 synthetic PDFs
+│   └── expected/                   # expected JSON for each sample (ground truth)
+├── tests/                          # mirrors src/: domain/, application/, adapters/, entrypoints/
+│   └── test_architecture.py        # enforces the layer dependency rules
 └── scripts/
-    └── evaluate.py             # runs samples through real LLM, prints accuracy table
+    └── evaluate.py                 # runs samples through real LLM, prints accuracy table
 ```
 
 ---
 
-## 4. Data model (`schemas.py`)
+## 4. Data model (`domain/models.py`)
 
 The models are deliberately **permissive**: they describe what the LLM returned, not what a
 good order looks like. Business rules (at least one line, quantity > 0, …) live in
-`validation.py`, so a bad order produces a `ValidationIssue` instead of a Pydantic exception.
+`domain/validation.py`, so a bad order produces a `ValidationIssue` instead of a Pydantic exception.
 
 ```python
 class OrderLine(BaseModel):
@@ -115,7 +150,7 @@ class ExtractionResult(BaseModel):
 
 ---
 
-## 5. Prompt design (`prompts.py`)
+## 5. Prompt design (`application/prompts.py`)
 
 System prompt rules:
 - Extract only what the text states; **never invent** products, quantities or dates
@@ -133,30 +168,32 @@ supported; fall back to "JSON only" instructions + `Order.model_validate_json()`
 Strict mode only accepts a subset of JSON Schema: every property must be listed in `required`
 (optional ones are nullable instead), `additionalProperties` must be `false`, and some keywords
 such as numeric/length limits are not supported. So don't pass `Order.model_json_schema()`
-directly — build an LLM-facing schema with a helper (`llm_schema()` in `schemas.py`) that
-produces a strict-compatible version, and test that helper.
+directly — the OpenAI adapter converts it with `to_strict_schema()` (`adapters/llm/schema.py`).
+That quirk belongs to the OpenAI adapter, so the domain model stays provider-neutral.
 
 ---
 
-## 6. LLM layer (`llm.py`)
+## 6. LLM layer (`application/ports.py` + `adapters/llm/`)
 
 ```python
+# application/ports.py
 class LLMClient(Protocol):
     async def extract(self, system: str, user: str, schema: dict) -> LLMResponse: ...
 
+# adapters/llm/
 class OpenAIClient: ...        # base_url default
 class OpenRouterClient: ...    # same SDK, base_url="https://openrouter.ai/api/v1"
 class FakeLLM: ...             # returns canned JSON for tests
 ```
 
 - `LLMResponse` holds `text`, `model`, `input_tokens`, `output_tokens`
-- Provider and model chosen from env vars
+- Provider and model chosen from env vars via `config.py` and the `create_llm_client()` factory
 - Timeout + 2 retries with backoff
 - v0.2 idea: ordered fallback list of models (mirrors the production pattern)
 
 ---
 
-## 7. Validation rules (`validation.py`)
+## 7. Validation rules (`domain/validation.py`)
 
 Return issues, don't raise:
 - **error**: no order lines; quantity missing or ≤ 0; unparseable JSON / output that doesn't match the schema
@@ -171,15 +208,15 @@ Date rules compare against the same `today` that was given to the prompt.
 
 ## 8. API and CLI
 
-**API** (`api.py`)
+**API** (`entrypoints/api.py`)
 - `POST /extract/text` — body `{ "text": "...", "today": "2026-10-01" }`
 - `POST /extract/file` — multipart upload (.txt, .eml, .pdf), optional `today` form field
 - `GET /health`
 - Returns `ExtractionResult`
 
-**CLI** (`cli.py`)
+**CLI** (`entrypoints/cli.py`)
 ```bash
-python -m order_extractor.cli samples/emails/01_simple.txt --today 2026-10-01
+python -m order_extractor.entrypoints.cli samples/emails/01_simple.txt --today 2026-10-01
 ```
 Prints the JSON result and a short summary. `--today` defaults to the current date; pass it
 explicitly for repeatable runs (the eval script always does).
@@ -207,11 +244,14 @@ Each sample's expected file also records the `today` date it was written against
 
 ## 10. Tests (no API key needed)
 
-- `test_schemas.py` — valid/invalid models
-- `test_parsing.py` — .eml body extraction, PDF text extraction
-- `test_validation.py` — each rule triggers correctly
-- `test_extractor.py` — `FakeLLM` returns canned JSON; check result + issues; check bad JSON handled
-- `test_api.py` — FastAPI `TestClient` against both endpoints
+`tests/` mirrors `src/`:
+- `domain/test_models.py` — valid/invalid models
+- `domain/test_validation.py` — each rule triggers correctly
+- `adapters/test_llm_schema.py` — strict-mode schema conversion
+- `adapters/test_parsing.py` — .eml body extraction, PDF text extraction
+- `application/test_extract_order.py` — `FakeLLM` returns canned JSON; check result + issues; check bad JSON handled
+- `entrypoints/test_api.py` — FastAPI `TestClient` against both endpoints, `FakeLLM` injected via `Depends` override
+- `test_architecture.py` — layer dependency rules
 
 Target: `pytest` green, plus a GitHub Actions workflow that runs `ruff` + `pytest` on every push.
 
@@ -231,10 +271,10 @@ This sets up the next project, **llm-eval-harness**.
 ## 12. Milestones (one commit or PR each)
 
 1. Project skeleton: `pyproject.toml`, structure, `.env.example`, ruff, empty tests pass
-2. Schemas + validation rules + tests
-3. Parsing (text, .eml, PDF) + tests
-4. Prompts + LLM layer (OpenAI, OpenRouter, FakeLLM)
-5. Extractor orchestration + tests with FakeLLM
+2. Layered package structure + domain models + validation rules + tests
+3. Parser adapters (text, .eml, PDF) + registry + tests
+4. Config, prompts, LLM adapters (OpenAI, OpenRouter, FakeLLM) + factory
+5. `ExtractOrder` use case + tests with FakeLLM
 6. FastAPI + CLI + tests
 7. Synthetic samples + expected outputs
 8. Evaluation script + first results

@@ -6,7 +6,7 @@ good order looks like. Business rules (at least one line, quantity > 0, ...) liv
 """
 
 from datetime import date
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -47,28 +47,3 @@ class ExtractionResult(BaseModel):
     input_tokens: int | None = None
     output_tokens: int | None = None
     latency_ms: int
-
-
-def llm_schema() -> dict[str, Any]:
-    """JSON schema for ``Order`` that OpenAI structured outputs accept in strict mode.
-
-    Strict mode requires every property to be listed in ``required`` (optional fields are
-    nullable instead) and ``additionalProperties: false`` on every object, and it rejects
-    ``default``. Pydantic's schema has none of that, so we rewrite it.
-    """
-    schema = Order.model_json_schema()
-    _make_strict(schema)
-    return schema
-
-
-def _make_strict(node: Any) -> None:
-    if isinstance(node, dict):
-        node.pop("default", None)
-        if node.get("type") == "object" and "properties" in node:
-            node["required"] = list(node["properties"])
-            node["additionalProperties"] = False
-        for value in node.values():
-            _make_strict(value)
-    elif isinstance(node, list):
-        for item in node:
-            _make_strict(item)

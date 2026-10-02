@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
-from order_extractor.schemas import Order, OrderLine
-from order_extractor.validation import is_valid, validate_order
+from order_extractor.domain.models import Order, OrderLine
+from order_extractor.domain.validation import is_valid, validate_order
 
 TODAY = date(2026, 10, 1)
 

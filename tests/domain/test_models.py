@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from order_extractor.schemas import ExtractionResult, Order, OrderLine, llm_schema
+from order_extractor.domain.models import ExtractionResult, Order, OrderLine
 
 
 def test_order_parses_llm_json():
@@ -48,39 +48,3 @@ def test_bad_date_rejected():
 def test_extraction_result_allows_no_order():
     result = ExtractionResult(order=None, issues=[], is_valid=False, model="fake", latency_ms=0)
     assert result.order is None
-
-
-def _objects(node):
-    if isinstance(node, dict):
-        if node.get("type") == "object":
-            yield node
-        for value in node.values():
-            yield from _objects(value)
-    elif isinstance(node, list):
-        for item in node:
-            yield from _objects(item)
-
-
-def _keys(node):
-    if isinstance(node, dict):
-        for key, value in node.items():
-            yield key
-            yield from _keys(value)
-    elif isinstance(node, list):
-        for item in node:
-            yield from _keys(item)
-
-
-def test_llm_schema_is_strict_compatible():
-    schema = llm_schema()
-    objects = list(_objects(schema))
-    assert len(objects) == 2  # Order and OrderLine
-    for obj in objects:
-        assert obj["additionalProperties"] is False
-        assert set(obj["required"]) == set(obj["properties"])
-    assert "default" not in set(_keys(schema))
-
-
-def test_llm_schema_does_not_mutate_model_schema():
-    llm_schema()
-    assert "additionalProperties" not in Order.model_json_schema()

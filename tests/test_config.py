@@ -65,3 +65,11 @@ def test_temperature_none_omits_it():
 def test_invalid_values(env, message):
     with pytest.raises(ConfigError, match=message):
         Settings.from_env(env)
+
+
+def test_suite_runs_without_api_keys():
+    # Guard from conftest.py: a key in the shell must not leak into tests.
+    import os
+
+    assert "OPENAI_API_KEY" not in os.environ
+    assert "OPENROUTER_API_KEY" not in os.environ

@@ -289,6 +289,15 @@ Target: `pytest` green, plus a GitHub Actions workflow that runs `ruff` + `pytes
 - Prints a table: sample, field accuracy, issues, tokens, latency, cost estimate
 - Writes `eval_results.md` so the README can show real numbers
 
+Built: `python -m scripts.evaluate [--provider] [--model] [--dry-run] [--output]`.
+- Checks per sample: parsed, customer name, reference, delivery date, line count, and per line
+  description / quantity / unit; plus the exact issue set and `is_valid`
+- Lenient where wording varies: case, punctuation and plurals are ignored, lines are matched
+  by description (order doesn't matter), and estimated quantities only need the estimate flag
+- `--dry-run` replays the ground truth through `FakeLLM` (no key, must score 100%)
+- Exits 1 if any sample errored, 2 if the LLM isn't configured
+- First real results are pending: no live API calls until explicitly approved
+
 This sets up the next project, **llm-eval-harness**.
 
 ---

@@ -280,6 +280,11 @@ matches the validation rules and only contains values present in each document.
 
 Target: `pytest` green, plus a GitHub Actions workflow that runs `ruff` + `pytest` on every push.
 
+Built: `.github/workflows/ci.yml` runs on pushes to `main` and on every pull request. A lint
+job runs `ruff check` + `ruff format --check`, and a test job runs `pytest`, the evaluation
+`--dry-run` and a CLI smoke test on Python 3.11–3.14. No secrets are configured, so CI can never
+call a real LLM. Dependabot checks actions and pip dependencies monthly.
+
 ---
 
 ## 11. Evaluation script (`scripts/evaluate.py`)

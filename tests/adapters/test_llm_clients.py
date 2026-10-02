@@ -10,7 +10,12 @@ from order_extractor.adapters.llm import (
     OpenRouterClient,
     create_llm_client,
 )
-from order_extractor.adapters.llm.openai_client import OPENROUTER_BASE_URL, strip_code_fences
+from order_extractor.adapters.llm.openai_client import (
+    OLLAMA_BASE_URL,
+    OPENROUTER_BASE_URL,
+    OllamaClient,
+    strip_code_fences,
+)
 from order_extractor.application.errors import LLMError
 from order_extractor.application.ports import LLMResponse
 from order_extractor.config import ConfigError, Settings
@@ -211,3 +216,40 @@ def test_factory_requires_the_provider_key(provider, variable):
     settings = Settings(llm_provider=provider, **keys[provider])
     with pytest.raises(ConfigError, match=variable):
         create_llm_client(settings)
+
+
+def test_factory_builds_ollama_client_without_a_key():
+    settings = Settings(
+        llm_provider="ollama", llm_model="qwen2.5:14b-instruct", structured_output=False
+    )
+    client = create_llm_client(settings)
+    assert isinstance(client, OllamaClient)
+    assert client.model == "qwen2.5:14b-instruct"
+    assert client.structured_output is False
+    assert str(client._client.base_url).rstrip("/") == OLLAMA_BASE_URL
+
+
+def test_factory_passes_base_url_through():
+    settings = Settings(llm_provider="ollama", llm_base_url="http://gpu-box:11434/v1")
+    assert str(create_llm_client(settings)._client.base_url).startswith("http://gpu-box:11434")
+    settings = Settings(openai_api_key="sk", llm_base_url="http://proxy.local/v1")
+    assert str(create_llm_client(settings)._client.base_url).startswith("http://proxy.local")
+    settings = Settings(
+        llm_provider="openrouter", openrouter_api_key="sk", llm_base_url="http://x/v1"
+    )
+    assert str(create_llm_client(settings)._client.base_url).startswith("http://x")
+
+
+def test_factory_without_base_url_keeps_provider_defaults():
+    settings = Settings(llm_provider="openrouter", openrouter_api_key="sk")
+    client = create_llm_client(settings)
+    assert str(client._client.base_url).rstrip("/") == OPENROUTER_BASE_URL
+
+
+async def test_ollama_client_puts_schema_in_prompt():
+    sdk = StubSDK(completion())
+    client = OllamaClient(model="qwen2.5:14b-instruct", structured_output=False, client=sdk)
+    await client.extract("sys", "user", {"type": "object"})
+    request = sdk.requests[0]
+    assert "response_format" not in request
+    assert "JSON schema" in request["messages"][0]["content"]

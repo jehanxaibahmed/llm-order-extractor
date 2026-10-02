@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Literal, get_args
 
-Provider = Literal["openai", "openrouter"]
+Provider = Literal["openai", "openrouter", "ollama"]
 PROVIDERS: tuple[str, ...] = get_args(Provider)
 
 DEFAULT_MODEL = "gpt-4o-mini"
@@ -29,11 +29,17 @@ class Settings:
     temperature: float | None = DEFAULT_TEMPERATURE
     """``None`` omits the parameter, for models that reject it (e.g. reasoning models)."""
     structured_output: bool = True
-    """Use JSON-schema structured outputs. Off by default for OpenRouter, where support varies."""
+    """Use JSON-schema structured outputs. Off by default for OpenRouter and Ollama."""
+    llm_base_url: str | None = None
+    """Override the provider's API base URL (any OpenAI-compatible endpoint)."""
 
     @property
     def api_key(self) -> str | None:
-        return self.openai_api_key if self.llm_provider == "openai" else self.openrouter_api_key
+        if self.llm_provider == "openai":
+            return self.openai_api_key
+        if self.llm_provider == "openrouter":
+            return self.openrouter_api_key
+        return None  # ollama needs no key
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] = os.environ) -> "Settings":
@@ -55,6 +61,7 @@ class Settings:
             if env.text("LLM_TEMPERATURE") == "none"
             else env.number("LLM_TEMPERATURE", float, DEFAULT_TEMPERATURE),
             structured_output=env.flag("LLM_STRUCTURED_OUTPUT", default=provider == "openai"),
+            llm_base_url=env.text("LLM_BASE_URL"),
         )
 
 

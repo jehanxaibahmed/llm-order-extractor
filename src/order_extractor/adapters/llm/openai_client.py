@@ -1,4 +1,4 @@
-"""LLM clients for OpenAI and OpenRouter (OpenRouter speaks the OpenAI API at another URL).
+"""LLM clients for OpenAI, OpenRouter and Ollama (all speak the OpenAI API, at different URLs).
 
 Retries with exponential backoff (connection errors, 408/409/429/5xx) and timeouts come from
 the ``openai`` SDK itself via ``max_retries`` and ``timeout``.
@@ -16,6 +16,7 @@ from order_extractor.application.errors import LLMError
 from order_extractor.application.ports import LLMResponse
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OLLAMA_BASE_URL = "http://localhost:11434/v1"
 SCHEMA_NAME = "order"
 
 _CODE_FENCE = re.compile(r"^```(?:json)?\s*\n(.*?)\n?```$", re.DOTALL)
@@ -100,6 +101,14 @@ class OpenRouterClient(OpenAICompatibleClient):
     def __init__(self, *, api_key: str, model: str, **kwargs: Any) -> None:
         kwargs.setdefault("base_url", OPENROUTER_BASE_URL)
         kwargs.setdefault("default_headers", {"X-Title": "llm-order-extractor"})
+        super().__init__(api_key=api_key, model=model, **kwargs)
+
+
+class OllamaClient(OpenAICompatibleClient):
+    """Local Ollama server. It ignores the API key, but the SDK requires a non-empty one."""
+
+    def __init__(self, *, model: str, api_key: str = "ollama", **kwargs: Any) -> None:
+        kwargs.setdefault("base_url", OLLAMA_BASE_URL)
         super().__init__(api_key=api_key, model=model, **kwargs)
 
 

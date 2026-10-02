@@ -221,7 +221,10 @@ Date rules compare against the same `today` that was given to the prompt.
 **API** (`entrypoints/api.py`) — `uvicorn order_extractor.entrypoints.api:app --reload`
 - `POST /extract/text` — body `{ "text": "...", "today": "2026-10-01" }` (`today` optional)
 - `POST /extract/file` — multipart upload (.txt, .eml, .pdf, max 5 MB), optional `today` form field
-- `GET /health`, plus FastAPI's `/docs`
+- `GET /health`
+- **Swagger UI** at `/docs` (`/` redirects there) and ReDoc at `/redoc`: endpoints grouped by tag,
+  example request and response, every error status documented with an example, field
+  descriptions from the model docstrings, "Try it out" on by default
 - Returns `ExtractionResult` with **200** whenever the document was processed — content problems
   are in `issues`. Errors: **415** unsupported file type, **400** unreadable file, **413** too large,
   **422** bad request body, **502** LLM call failed, **503** LLM not configured (missing key)

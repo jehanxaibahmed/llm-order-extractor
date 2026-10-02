@@ -159,3 +159,62 @@ def test_unsupported_file_is_415_even_when_llm_not_configured():
         "/extract/file", files={"file": ("order.docx", b"x", "application/x")}
     )
     assert response.status_code == 415
+
+
+# --- Swagger / OpenAPI docs -----------------------------------------------------------------
+
+
+@pytest.fixture
+def openapi(client):
+    return client.get("/openapi.json").json()
+
+
+def test_root_redirects_to_swagger(client):
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/docs"
+
+
+def test_swagger_ui_is_served_with_try_it_out(client):
+    response = client.get("/docs")
+    assert response.status_code == 200
+    assert "swagger-ui" in response.text
+    assert '"tryItOutEnabled": true' in response.text
+    assert client.get("/redoc").status_code == 200
+
+
+def test_endpoints_are_tagged_and_summarised(openapi):
+    assert [t["name"] for t in openapi["tags"]] == ["extraction", "health"]
+    for path, method in [("/extract/text", "post"), ("/extract/file", "post"), ("/health", "get")]:
+        operation = openapi["paths"][path][method]
+        assert operation["tags"] and operation["summary"]
+    assert "/" not in openapi["paths"]
+
+
+def test_error_responses_are_documented(openapi):
+    text_codes = set(openapi["paths"]["/extract/text"]["post"]["responses"])
+    file_codes = set(openapi["paths"]["/extract/file"]["post"]["responses"])
+    assert {"200", "422", "502", "503"} <= text_codes
+    assert {"200", "400", "413", "415", "422", "502", "503"} <= file_codes
+    error = openapi["paths"]["/extract/file"]["post"]["responses"]["415"]
+    assert error["content"]["application/json"]["schema"]["$ref"].endswith("/ErrorResponse")
+
+
+def test_examples_are_valid_against_the_models(openapi):
+    from order_extractor.domain.models import ExtractionResult
+
+    request_schema = openapi["components"]["schemas"]["ExtractTextRequest"]
+    example = request_schema["examples"][0]
+    api.ExtractTextRequest.model_validate(example)
+
+    response = openapi["paths"]["/extract/text"]["post"]["responses"]["200"]
+    ExtractionResult.model_validate(response["content"]["application/json"]["example"])
+
+
+def test_model_fields_have_descriptions(openapi):
+    schemas = openapi["components"]["schemas"]
+    for name in ("Order", "OrderLine", "ValidationIssue", "ExtractionResult"):
+        missing = [
+            f for f, spec in schemas[name]["properties"].items() if "description" not in spec
+        ]
+        assert missing == [], f"{name}: {missing}"

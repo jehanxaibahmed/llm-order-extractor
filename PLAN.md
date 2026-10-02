@@ -190,7 +190,10 @@ class FakeLLM: ...             # returns canned JSON for tests
 
 - `LLMResponse` holds `text`, `model`, `input_tokens`, `output_tokens`
 - Provider and model chosen from env vars via `config.py` and the `create_llm_client()` factory
-- Timeout + 2 retries with backoff
+- Timeout + 2 retries with backoff — delegated to the `openai` SDK (`timeout`, `max_retries`), which
+  retries connection errors, 408/409/429 and 5xx with exponential backoff
+- SDK errors, refusals and empty replies are raised as `LLMError` (`application/errors.py`)
+- Structured outputs default on for OpenAI, off for OpenRouter (`LLM_STRUCTURED_OUTPUT` overrides)
 - v0.2 idea: ordered fallback list of models (mirrors the production pattern)
 
 ---

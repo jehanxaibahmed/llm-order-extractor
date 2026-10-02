@@ -83,6 +83,7 @@ llm-order-extractor/
 │   │   └── validation.py           # business rules → list[ValidationIssue]
 │   ├── application/
 │   │   ├── ports.py                # LLMClient, DocumentParser protocols; LLMResponse
+│   │   ├── errors.py               # DocumentParseError, UnsupportedFileTypeError, ...
 │   │   ├── prompts.py              # system + user prompt templates
 │   │   └── extract_order.py        # ExtractOrder use case: text → LLM → parse → validate
 │   ├── adapters/
@@ -93,7 +94,8 @@ llm-order-extractor/
 │   │   │   └── fake.py             # FakeLLM for tests
 │   │   └── parsing/
 │   │       ├── __init__.py         # get_parser(filename) registry
-│   │       ├── email.py            # .txt and .eml
+│   │       ├── text.py             # .txt, plus decoding / clean-up shared by all parsers
+│   │       ├── eml.py              # .eml: From/Date/Subject + body (HTML → text, forwarded parts)
 │   │       └── pdf.py              # text-based PDF via pypdf
 │   └── entrypoints/
 │       ├── api.py                  # FastAPI app

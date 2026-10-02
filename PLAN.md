@@ -218,18 +218,25 @@ Date rules compare against the same `today` that was given to the prompt.
 
 ## 8. API and CLI
 
-**API** (`entrypoints/api.py`)
-- `POST /extract/text` — body `{ "text": "...", "today": "2026-10-01" }`
-- `POST /extract/file` — multipart upload (.txt, .eml, .pdf), optional `today` form field
-- `GET /health`
-- Returns `ExtractionResult`
+**API** (`entrypoints/api.py`) — `uvicorn order_extractor.entrypoints.api:app --reload`
+- `POST /extract/text` — body `{ "text": "...", "today": "2026-10-01" }` (`today` optional)
+- `POST /extract/file` — multipart upload (.txt, .eml, .pdf, max 5 MB), optional `today` form field
+- `GET /health`, plus FastAPI's `/docs`
+- Returns `ExtractionResult` with **200** whenever the document was processed — content problems
+  are in `issues`. Errors: **415** unsupported file type, **400** unreadable file, **413** too large,
+  **422** bad request body, **502** LLM call failed, **503** LLM not configured (missing key)
+- The use case is a FastAPI dependency (`get_extract_order`); tests override it with `FakeLLM`
 
-**CLI** (`entrypoints/cli.py`)
+**CLI** (`entrypoints/cli.py`) — installed as `order-extractor`
 ```bash
-python -m order_extractor.entrypoints.cli samples/emails/01_simple.txt --today 2026-10-01
+order-extractor samples/emails/01_simple.txt --today 2026-10-01
+order-extractor po.pdf --provider openrouter --model openai/gpt-4o-mini --quiet
 ```
-Prints the JSON result and a short summary. `--today` defaults to the current date; pass it
-explicitly for repeatable runs (the eval script always does).
+JSON result on stdout (pipeable), human summary on stderr. `--today` defaults to the current
+date; pass it explicitly for repeatable runs (the eval script always does). Exit codes: **0**
+valid order, **1** order has errors, **2** could not run (bad file, config or LLM failure).
+
+Both entrypoints build the use case through `entrypoints/wiring.py`, which loads `.env`.
 
 ---
 

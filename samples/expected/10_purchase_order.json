@@ -1,0 +1,46 @@
+{
+  "source": "pdfs/10_purchase_order.pdf",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Riverside Bistro",
+    "customer_reference": "RB-2026-118",
+    "requested_delivery_date": "2026-10-05",
+    "delivery_address": "Kitchen door at rear, 3 Wharf Road, Ashbury AB1 4QT",
+    "lines": [
+      {
+        "product_description": "Chestnut mushrooms",
+        "quantity": 4,
+        "quantity_text": "4",
+        "quantity_is_estimate": false,
+        "unit": "box",
+        "notes": null
+      },
+      {
+        "product_description": "Baby spinach",
+        "quantity": 2,
+        "quantity_text": "2",
+        "quantity_is_estimate": false,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "Maris Piper potatoes",
+        "quantity": 6,
+        "quantity_text": "6",
+        "quantity_is_estimate": false,
+        "unit": "kg",
+        "notes": null
+      },
+      {
+        "product_description": "Flat-leaf parsley",
+        "quantity": 1,
+        "quantity_text": "1",
+        "quantity_is_estimate": false,
+        "unit": "tray",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": []
+}

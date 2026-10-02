@@ -1,0 +1,51 @@
+{
+  "source": "emails/05_po_in_subject.eml",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Harbour Lights Hotel",
+    "customer_reference": "PO-44871",
+    "requested_delivery_date": "2026-10-09",
+    "delivery_address": "Goods entrance, Harbour Lights Hotel, 12 Quay Street, Porthaven PH1 2AB",
+    "lines": [
+      {
+        "product_description": "carrots",
+        "quantity": 8,
+        "quantity_text": "8",
+        "quantity_is_estimate": false,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "brown onions",
+        "quantity": 5,
+        "quantity_text": "5",
+        "quantity_is_estimate": false,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "free-range eggs",
+        "quantity": 600,
+        "quantity_text": "600",
+        "quantity_is_estimate": false,
+        "unit": null,
+        "notes": null
+      },
+      {
+        "product_description": "unsalted butter",
+        "quantity": 12,
+        "quantity_text": "12",
+        "quantity_is_estimate": false,
+        "unit": "kg",
+        "notes": null
+      }
+    ],
+    "notes": "Quote the PO number on the invoice."
+  },
+  "issues": [
+    {
+      "field": "lines[2].quantity",
+      "severity": "warning"
+    }
+  ]
+}

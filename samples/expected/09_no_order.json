@@ -1,0 +1,18 @@
+{
+  "source": "emails/09_no_order.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "The Copper Pot",
+    "customer_reference": null,
+    "requested_delivery_date": null,
+    "delivery_address": null,
+    "lines": [],
+    "notes": null
+  },
+  "issues": [
+    {
+      "field": "lines",
+      "severity": "error"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 925 >>
+stream
+BT /F2 18 Tf 60 760 Td (PURCHASE ORDER) Tj ET
+BT /F2 12 Tf 60 717 Td (Riverside Bistro) Tj ET
+BT /F1 11 Tf 60 699 Td (3 Wharf Road, Ashbury AB1 4QT) Tj ET
+BT /F1 11 Tf 60 683 Td (accounts@riversidebistro.example) Tj ET
+BT /F1 11 Tf 60 651 Td (To: Hillside Produce, Unit 7 Valley Trading Estate) Tj ET
+BT /F1 11 Tf 60 619 Td (PO number: RB-2026-118) Tj ET
+BT /F1 11 Tf 60 603 Td (Order date: 01/10/2026) Tj ET
+BT /F1 11 Tf 60 587 Td (Delivery date: 05/10/2026) Tj ET
+BT /F2 11 Tf 60 555 Td (Qty   Unit    Description) Tj ET
+BT /F1 11 Tf 60 539 Td (4     box     Chestnut mushrooms) Tj ET
+BT /F1 11 Tf 60 523 Td (2     case    Baby spinach) Tj ET
+BT /F1 11 Tf 60 507 Td (6     kg      Maris Piper potatoes) Tj ET
+BT /F1 11 Tf 60 491 Td (1     tray    Flat-leaf parsley) Tj ET
+BT /F1 11 Tf 60 459 Td (Deliver to: kitchen door at rear, 3 Wharf Road, Ashbury AB1 4QT) Tj ET
+BT /F1 11 Tf 60 443 Td (Authorised by: Priya Shah) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000212 00000 n 
+0000000314 00000 n 
+0000000450 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1426
+%%EOF

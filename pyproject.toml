@@ -37,6 +37,7 @@ packages = ["src/order_extractor"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "--import-mode=importlib"
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
@@ -46,3 +47,6 @@ extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["order_extractor", "scripts"]

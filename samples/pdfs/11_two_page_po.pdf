@@ -1,0 +1,61 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 620 >>
+stream
+BT /F2 18 Tf 60 760 Td (PURCHASE ORDER) Tj ET
+BT /F2 12 Tf 60 717 Td (Oak & Ember) Tj ET
+BT /F1 11 Tf 60 699 Td (88 High Street, Porthaven PH2 7LD) Tj ET
+BT /F1 11 Tf 60 667 Td (Supplier: Hillside Produce) Tj ET
+BT /F1 11 Tf 60 651 Td (PO number: OE-5530) Tj ET
+BT /F1 11 Tf 60 635 Td (Requested delivery: 28/09/2026) Tj ET
+BT /F2 11 Tf 60 603 Td (Qty   Unit    Description) Tj ET
+BT /F1 11 Tf 60 587 Td (5     box     Jersey Royal potatoes) Tj ET
+BT /F1 11 Tf 60 571 Td (3     case    Little Gem lettuce) Tj ET
+BT /F1 11 Tf 60 555 Td (2     kg      Fresh ginger) Tj ET
+BT /F1 11 Tf 60 523 Td (Continued on page 2) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 332 >>
+stream
+BT /F2 12 Tf 60 760 Td (PURCHASE ORDER OE-5530 \(page 2 of 2\)) Tj ET
+BT /F2 11 Tf 60 726 Td (Qty   Unit    Description) Tj ET
+BT /F1 11 Tf 60 710 Td (4     bunch   Thai basil) Tj ET
+BT /F1 11 Tf 60 694 Td (1     box     Limes) Tj ET
+BT /F1 11 Tf 60 662 Td (Notes: please call Leo on arrival, side gate is locked before 10am.) Tj ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000218 00000 n 
+0000000320 00000 n 
+0000000456 00000 n 
+0000001127 00000 n 
+0000001263 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+1646
+%%EOF

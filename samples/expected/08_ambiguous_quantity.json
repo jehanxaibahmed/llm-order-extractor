@@ -1,0 +1,39 @@
+{
+  "source": "emails/08_ambiguous_quantity.txt",
+  "today": "2026-10-01",
+  "order": {
+    "customer_name": "Green Leaf Café",
+    "customer_reference": null,
+    "requested_delivery_date": "2026-10-02",
+    "delivery_address": null,
+    "lines": [
+      {
+        "product_description": "oat milk",
+        "quantity": 2,
+        "quantity_text": "a couple of",
+        "quantity_is_estimate": true,
+        "unit": "case",
+        "notes": null
+      },
+      {
+        "product_description": "blueberries",
+        "quantity": 3,
+        "quantity_text": "a few",
+        "quantity_is_estimate": true,
+        "unit": "punnet",
+        "notes": null
+      }
+    ],
+    "notes": null
+  },
+  "issues": [
+    {
+      "field": "lines[0].quantity",
+      "severity": "warning"
+    },
+    {
+      "field": "lines[1].quantity",
+      "severity": "warning"
+    }
+  ]
+}

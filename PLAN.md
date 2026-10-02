@@ -205,6 +205,11 @@ Return issues, don't raise:
 - **warning**: quantity above a threshold (e.g. > 500); `quantity_is_estimate` is true; delivery date in the past; delivery date > 60 days away; missing customer name; duplicate product lines
 
 These checks only work because the schema doesn't enforce them (see §4) — keep it that way.
+
+`ExtractOrder` (`application/extract_order.py`) adds the issues that come before these rules:
+empty document (error, LLM not called), document over 50,000 characters (truncated, warning),
+output that isn't JSON or doesn't fit the schema (error, `order: null`, one issue per bad field).
+LLM and file-parsing failures are raised, not returned, so the API can map them to HTTP errors.
 Date rules compare against the same `today` that was given to the prompt.
 
 `is_valid = no errors`

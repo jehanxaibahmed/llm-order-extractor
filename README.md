@@ -149,6 +149,18 @@ flowchart LR
 
 **Request flow:** file → parser → plain text → prompt (with `today`) → LLM (strict JSON schema) → parse into `Order` → validation rules → `ExtractionResult`. A problem with the *content* (bad JSON, schema mismatch, broken business rule) comes back as an issue with HTTP 200. A problem with the *infrastructure* (LLM down, unreadable file, missing key) raises an exception, which becomes 502, 400 or 503.
 
+### Run locally with Ollama
+
+No API key and no cost. Install [Ollama](https://ollama.com), pull a model, then point the extractor at it:
+
+```bash
+ollama pull qwen2.5:14b-instruct
+export LLM_PROVIDER=ollama LLM_MODEL=qwen2.5:14b-instruct LLM_TIMEOUT_SECONDS=120
+order-extractor samples/emails/05_po_in_subject.eml --today 2026-10-01
+```
+
+The client uses Ollama's OpenAI-compatible endpoint (`http://localhost:11434/v1`; override with `LLM_BASE_URL`). Strict JSON-schema output is off by default for Ollama, so the schema is sent in the prompt instead. Local models are slower than hosted ones, hence the longer timeout. The same `LLM_BASE_URL` also works for other OpenAI-compatible servers (vLLM, LM Studio, a proxy).
+
 ## 📊 Accuracy
 
 Evaluated on 11 synthetic samples ([`samples/`](samples/README.md)): 9 emails and 2 PDFs, covering bulleted and paragraph orders, relative dates, a PO in the subject, a forwarded email with a disclaimer, chit-chat, vague quantities, an email with no order, and a two-page PDF. Each sample is scored on up to 22 checks: customer, reference, delivery date, line count, each line's description, quantity and unit, the expected warnings and errors, and validity.
@@ -163,13 +175,14 @@ Evaluated on 11 synthetic samples ([`samples/`](samples/README.md)): 9 emails an
 
 | Variable | Default | |
 |---|---|---|
-| `LLM_PROVIDER` | `openai` | `openai` or `openrouter` |
+| `LLM_PROVIDER` | `openai` | `openai`, `openrouter` or `ollama` |
 | `LLM_MODEL` | `gpt-4o-mini` | any model the provider offers |
-| `OPENAI_API_KEY` / `OPENROUTER_API_KEY` | none | key for the selected provider |
+| `OPENAI_API_KEY` / `OPENROUTER_API_KEY` | none | key for the selected provider (not needed for Ollama) |
+| `LLM_BASE_URL` | provider default (`http://localhost:11434/v1` for Ollama) | any OpenAI-compatible endpoint |
 | `LLM_TIMEOUT_SECONDS` | `30` | per request |
 | `LLM_MAX_RETRIES` | `2` | with exponential backoff, handled by the OpenAI SDK |
 | `LLM_TEMPERATURE` | `0` | `none` to omit, for models that reject it |
-| `LLM_STRUCTURED_OUTPUT` | `true` for OpenAI, `false` for OpenRouter | strict JSON schema vs. schema in the prompt |
+| `LLM_STRUCTURED_OUTPUT` | `true` for OpenAI, `false` for OpenRouter and Ollama | strict JSON schema vs. schema in the prompt |
 
 ## 🗺️ Roadmap
 

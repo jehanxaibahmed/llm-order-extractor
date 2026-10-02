@@ -73,3 +73,20 @@ def test_suite_runs_without_api_keys():
 
     assert "OPENAI_API_KEY" not in os.environ
     assert "OPENROUTER_API_KEY" not in os.environ
+
+
+def test_ollama_needs_no_key_and_defaults_to_prompt_schema():
+    s = Settings.from_env({"LLM_PROVIDER": "ollama", "LLM_MODEL": "qwen2.5:14b-instruct"})
+    assert s.llm_provider == "ollama"
+    assert s.api_key is None
+    assert s.structured_output is False
+    assert s.llm_base_url is None
+    env = {"LLM_PROVIDER": "ollama", "LLM_STRUCTURED_OUTPUT": "true"}
+    assert Settings.from_env(env).structured_output is True
+
+
+def test_base_url_is_read_and_blank_means_unset():
+    assert (
+        Settings.from_env({"LLM_BASE_URL": " http://host:1/v1 "}).llm_base_url == "http://host:1/v1"
+    )
+    assert Settings.from_env({"LLM_BASE_URL": " "}).llm_base_url is None

@@ -33,6 +33,7 @@ packages = ["src/order_extractor"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "--import-mode=importlib"
 
 [tool.ruff]
 line-length = 100

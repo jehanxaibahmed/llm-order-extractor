@@ -331,6 +331,10 @@ This sets up the next project, **llm-eval-harness**.
 - Accuracy table from `eval_results.md`
 - Roadmap: OCR for scanned PDFs, model fallback chain, product matching (links to **semantic-product-matcher**), voice input (links to **voice-to-order**)
 
+Built in v0.1.0, except the accuracy table: it is a marked placeholder until the first live
+evaluation run is approved. The README example output is the sample's ground truth passed
+through the real validation step, and is labelled as such.
+
 ---
 
 ## 14. Prompt to give Claude Code

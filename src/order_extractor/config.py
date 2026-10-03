@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Literal, get_args
 
-Provider = Literal["openai", "openrouter", "ollama"]
+Provider = Literal["openai", "openrouter", "ollama", "anthropic", "gemini", "deepseek"]
 PROVIDERS: tuple[str, ...] = get_args(Provider)
 
 DEFAULT_MODEL = "gpt-4o-mini"
@@ -24,6 +24,9 @@ class Settings:
     llm_model: str = DEFAULT_MODEL
     openai_api_key: str | None = None
     openrouter_api_key: str | None = None
+    anthropic_api_key: str | None = None
+    gemini_api_key: str | None = None
+    deepseek_api_key: str | None = None
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS
     max_retries: int = DEFAULT_MAX_RETRIES
     temperature: float | None = DEFAULT_TEMPERATURE
@@ -39,6 +42,12 @@ class Settings:
             return self.openai_api_key
         if self.llm_provider == "openrouter":
             return self.openrouter_api_key
+        if self.llm_provider == "anthropic":
+            return self.anthropic_api_key
+        if self.llm_provider == "gemini":
+            return self.gemini_api_key
+        if self.llm_provider == "deepseek":
+            return self.deepseek_api_key
         return None  # ollama needs no key
 
     @classmethod
@@ -55,6 +64,9 @@ class Settings:
             llm_model=env.text("LLM_MODEL") or DEFAULT_MODEL,
             openai_api_key=env.text("OPENAI_API_KEY"),
             openrouter_api_key=env.text("OPENROUTER_API_KEY"),
+            anthropic_api_key=env.text("ANTHROPIC_API_KEY"),
+            gemini_api_key=env.text("GEMINI_API_KEY"),
+            deepseek_api_key=env.text("DEEPSEEK_API_KEY"),
             timeout_seconds=env.number("LLM_TIMEOUT_SECONDS", float, DEFAULT_TIMEOUT_SECONDS),
             max_retries=env.number("LLM_MAX_RETRIES", int, DEFAULT_MAX_RETRIES),
             temperature=None

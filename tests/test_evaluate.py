@@ -139,4 +139,4 @@ def test_cli_without_key_exits_2(monkeypatch, capsys):
 
     monkeypatch.setattr(evaluate, "load_settings", lambda: Settings.from_env({}))
     assert evaluate.main(["--output", "unused.md"]) == 2
-    assert "OPENAI_API_KEY is not set" in capsys.readouterr().err
+    assert "API key is not set for provider" in capsys.readouterr().err

@@ -106,7 +106,7 @@ def test_missing_api_key_exits_2(email_file, capsys, monkeypatch):
     monkeypatch.setattr(cli, "load_settings", lambda: Settings.from_env({}))
     code = cli.main([str(email_file)])
     assert code == cli.EXIT_FAILED
-    assert "OPENAI_API_KEY is not set" in capsys.readouterr().err
+    assert "API key is not set for provider" in capsys.readouterr().err
 
 
 def test_provider_and_model_overrides(email_file, monkeypatch):

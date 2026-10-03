@@ -55,7 +55,7 @@ def test_temperature_none_omits_it():
 @pytest.mark.parametrize(
     ("env", "message"),
     [
-        ({"LLM_PROVIDER": "anthropic"}, "LLM_PROVIDER"),
+        ({"LLM_PROVIDER": "invalid"}, "LLM_PROVIDER"),
         ({"LLM_TIMEOUT_SECONDS": "soon"}, "LLM_TIMEOUT_SECONDS"),
         ({"LLM_MAX_RETRIES": "-1"}, "LLM_MAX_RETRIES"),
         ({"LLM_MAX_RETRIES": "1.5"}, "LLM_MAX_RETRIES"),

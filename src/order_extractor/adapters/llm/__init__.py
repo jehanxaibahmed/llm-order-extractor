@@ -1,6 +1,6 @@
 """LLM client adapters and the factory that picks one from settings."""
 
-from order_extractor.adapters.llm.fake import SyntheticLLM
+from order_extractor.adapters.llm.synthetic import SyntheticLLM
 from order_extractor.adapters.llm.litellm_client import LiteLLMClient
 from order_extractor.application.ports import LLMClient
 from order_extractor.config import ConfigError, Settings

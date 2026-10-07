@@ -8,7 +8,7 @@ from typing import Literal, get_args
 Provider = Literal["openai", "openrouter", "ollama", "anthropic", "gemini", "deepseek"]
 PROVIDERS: tuple[str, ...] = get_args(Provider)
 
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "qwen2.5-coder:14b"
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_RETRIES = 2
 DEFAULT_TEMPERATURE = 0.0

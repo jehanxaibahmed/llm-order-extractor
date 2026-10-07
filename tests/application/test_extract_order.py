@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from order_extractor.adapters.llm import FakeLLM
+from order_extractor.adapters.llm import SyntheticLLM
 from order_extractor.adapters.parsing import PlainTextParser
 from order_extractor.application.errors import DocumentParseError, LLMError
 from order_extractor.application.extract_order import ExtractOrder, parse_order
@@ -52,7 +52,7 @@ class FakeClock:
 
 
 def use_case(*responses, **kwargs):
-    llm = FakeLLM(*responses)
+    llm = SyntheticLLM(*responses)
     kwargs.setdefault("clock", FakeClock(10.0, 10.25))
     return ExtractOrder(llm, **kwargs), llm
 

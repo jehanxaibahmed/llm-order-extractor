@@ -2,7 +2,7 @@
 
     python -m scripts.evaluate                      # real LLM, settings from env / .env
     python -m scripts.evaluate --model gpt-4.1-mini
-    python -m scripts.evaluate --dry-run            # FakeLLM replays the ground truth, no key
+    python -m scripts.evaluate --dry-run            # SyntheticLLM replays the ground truth, no key
 
 Prints a Markdown table and writes it to eval_results.md.
 
@@ -25,7 +25,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
-from order_extractor.adapters.llm import FakeLLM
+from order_extractor.adapters.llm import SyntheticLLM
 from order_extractor.adapters.parsing import parse_file
 from order_extractor.application.errors import DocumentParseError, LLMError
 from order_extractor.application.extract_order import ExtractOrder
@@ -301,7 +301,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--provider", choices=PROVIDERS, help="override LLM_PROVIDER")
     parser.add_argument("--model", help="override LLM_MODEL")
     parser.add_argument(
-        "--dry-run", action="store_true", help="replay the ground truth with FakeLLM (no key)"
+        "--dry-run", action="store_true", help="replay the ground truth with SyntheticLLM (no key)"
     )
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--output", type=Path, default=ROOT / "eval_results.md")
@@ -309,10 +309,10 @@ def main(argv: list[str] | None = None) -> int:
 
     samples = load_samples()
     if args.dry_run:
-        model, provider = "fake-llm", "FakeLLM (dry run)"
+        model, provider = "fake-llm", "SyntheticLLM (dry run)"
 
         def make_extract(sample):
-            return ExtractOrder(FakeLLM(sample["order"]))
+            return ExtractOrder(SyntheticLLM(sample["order"]))
     else:
         try:
             settings = load_settings()

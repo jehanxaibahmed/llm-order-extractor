@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 
-from order_extractor.adapters.llm import FakeLLM
+from order_extractor.adapters.llm import SyntheticLLM
 from order_extractor.application.errors import LLMError
 from order_extractor.application.extract_order import ExtractOrder
 from scripts import evaluate
@@ -16,7 +16,7 @@ def samples():
 
 
 async def run(sample, llm_output):
-    return await evaluate.run_sample(sample, ExtractOrder(FakeLLM(llm_output)))
+    return await evaluate.run_sample(sample, ExtractOrder(SyntheticLLM(llm_output)))
 
 
 def failed(row):
@@ -24,7 +24,7 @@ def failed(row):
 
 
 async def test_ground_truth_scores_perfectly(samples):
-    rows = await run_all(list(samples.values()), lambda s: ExtractOrder(FakeLLM(s["order"])))
+    rows = await run_all(list(samples.values()), lambda s: ExtractOrder(SyntheticLLM(s["order"])))
     assert all(r.score.accuracy == 1.0 for r in rows), [(r.name, failed(r)) for r in rows]
 
 

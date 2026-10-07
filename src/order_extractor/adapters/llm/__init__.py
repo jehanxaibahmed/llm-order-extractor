@@ -1,6 +1,6 @@
 """LLM client adapters and the factory that picks one from settings."""
 
-from order_extractor.adapters.llm.fake import FakeLLM
+from order_extractor.adapters.llm.fake import SyntheticLLM
 from order_extractor.adapters.llm.litellm_client import LiteLLMClient
 from order_extractor.application.ports import LLMClient
 from order_extractor.config import ConfigError, Settings
@@ -23,4 +23,4 @@ def create_llm_client(settings: Settings) -> LLMClient:
         structured_output=settings.structured_output,
     )
 
-__all__ = ["FakeLLM", "LiteLLMClient", "create_llm_client"]
+__all__ = ["SyntheticLLM", "LiteLLMClient", "create_llm_client"]

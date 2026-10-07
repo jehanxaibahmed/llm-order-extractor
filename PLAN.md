@@ -18,7 +18,7 @@ This is a public portfolio project: **use synthetic sample data only** — nothi
 - One LLM provider interface with two backends: OpenAI and OpenRouter (any model)
 - FastAPI endpoint + CLI
 - Validation rules that flag problems instead of guessing
-- Tests that run **without** an API key (mocked LLM)
+- Tests that run **without** an API key (simulatored LLM)
 - A small evaluation script that measures accuracy on the sample set
 
 **Out of scope for v0.1** (put on the roadmap)
@@ -64,7 +64,7 @@ Patterns used:
 - **Factory** — `create_llm_client(settings)` picks OpenAI / OpenRouter / Fake from config
 - **Registry** — `get_parser(filename)` picks a parser by file extension
 - **Dependency injection** — `ExtractOrder(llm=...)` receives its client; the API wires it with
-  FastAPI `Depends`, so tests swap in `FakeLLM` without patching
+  FastAPI `Depends`, so tests swap in `SyntheticLLM` without patching
 
 `tests/test_architecture.py` reads every module's imports and fails if a layer breaks these rules.
 
@@ -91,7 +91,7 @@ llm-order-extractor/
 │   │   │   ├── __init__.py         # create_llm_client(settings) factory
 │   │   │   ├── schema.py           # to_strict_schema() for OpenAI strict mode
 │   │   │   ├── openai_client.py    # OpenAIClient, OpenRouterClient (same SDK, different base_url)
-│   │   │   └── fake.py             # FakeLLM for tests
+│   │   │   └── synthetic.py             # SyntheticLLM for tests
 │   │   └── parsing/
 │   │       ├── __init__.py         # get_parser(filename) registry
 │   │       ├── text.py             # .txt, plus decoding / clean-up shared by all parsers
@@ -185,7 +185,7 @@ class LLMClient(Protocol):
 # adapters/llm/
 class OpenAIClient: ...        # base_url default
 class OpenRouterClient: ...    # same SDK, base_url="https://openrouter.ai/api/v1"
-class FakeLLM: ...             # returns canned JSON for tests
+class SyntheticLLM: ...             # returns canned JSON for tests
 ```
 
 - `LLMResponse` holds `text`, `model`, `input_tokens`, `output_tokens`
@@ -228,7 +228,7 @@ Date rules compare against the same `today` that was given to the prompt.
 - Returns `ExtractionResult` with **200** whenever the document was processed — content problems
   are in `issues`. Errors: **415** unsupported file type, **400** unreadable file, **413** too large,
   **422** bad request body, **502** LLM call failed, **503** LLM not configured (missing key)
-- The use case is a FastAPI dependency (`get_extract_order`); tests override it with `FakeLLM`
+- The use case is a FastAPI dependency (`get_extract_order`); tests override it with `SyntheticLLM`
 
 **CLI** (`entrypoints/cli.py`) — installed as `order-extractor`
 ```bash
@@ -274,8 +274,8 @@ matches the validation rules and only contains values present in each document.
 - `domain/test_validation.py` — each rule triggers correctly
 - `adapters/test_llm_schema.py` — strict-mode schema conversion
 - `adapters/test_parsing.py` — .eml body extraction, PDF text extraction
-- `application/test_extract_order.py` — `FakeLLM` returns canned JSON; check result + issues; check bad JSON handled
-- `entrypoints/test_api.py` — FastAPI `TestClient` against both endpoints, `FakeLLM` injected via `Depends` override
+- `application/test_extract_order.py` — `SyntheticLLM` returns canned JSON; check result + issues; check bad JSON handled
+- `entrypoints/test_api.py` — FastAPI `TestClient` against both endpoints, `SyntheticLLM` injected via `Depends` override
 - `test_architecture.py` — layer dependency rules
 
 Target: `pytest` green, plus a GitHub Actions workflow that runs `ruff` + `pytest` on every push.
@@ -299,7 +299,7 @@ Built: `python -m scripts.evaluate [--provider] [--model] [--dry-run] [--output]
   description / quantity / unit; plus the exact issue set and `is_valid`
 - Lenient where wording varies: case, punctuation and plurals are ignored, lines are matched
   by description (order doesn't matter), and estimated quantities only need the estimate flag
-- `--dry-run` replays the ground truth through `FakeLLM` (no key, must score 100%)
+- `--dry-run` replays the ground truth through `SyntheticLLM` (no key, must score 100%)
 - Exits 1 if any sample errored, 2 if the LLM isn't configured
 - First real results are pending: no live API calls until explicitly approved
 
@@ -312,8 +312,8 @@ This sets up the next project, **llm-eval-harness**.
 1. Project skeleton: `pyproject.toml`, structure, `.env.example`, ruff, empty tests pass
 2. Layered package structure + domain models + validation rules + tests
 3. Parser adapters (text, .eml, PDF) + registry + tests
-4. Config, prompts, LLM adapters (OpenAI, OpenRouter, FakeLLM) + factory
-5. `ExtractOrder` use case + tests with FakeLLM
+4. Config, prompts, LLM adapters (OpenAI, OpenRouter, SyntheticLLM) + factory
+5. `ExtractOrder` use case + tests with SyntheticLLM
 6. FastAPI + CLI + tests
 7. Synthetic samples + expected outputs
 8. Evaluation script + first results

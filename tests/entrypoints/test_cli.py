@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from order_extractor.adapters.llm import FakeLLM
+from order_extractor.adapters.llm import SyntheticLLM
 from order_extractor.application.errors import LLMError
 from order_extractor.application.extract_order import ExtractOrder
 from order_extractor.config import Settings
@@ -43,7 +43,7 @@ def email_file(tmp_path):
 
 
 def test_valid_order_prints_json_and_summary(email_file, capsys):
-    llm = FakeLLM(ORDER)
+    llm = SyntheticLLM(ORDER)
     code = cli.main([str(email_file), "--today", "2026-10-01"], llm=llm)
     out, err = capsys.readouterr()
 
@@ -59,14 +59,14 @@ def test_valid_order_prints_json_and_summary(email_file, capsys):
 
 
 def test_quiet_prints_only_json(email_file, capsys):
-    cli.main([str(email_file), "--quiet"], llm=FakeLLM(ORDER))
+    cli.main([str(email_file), "--quiet"], llm=SyntheticLLM(ORDER))
     out, err = capsys.readouterr()
     json.loads(out)
     assert err == ""
 
 
 def test_invalid_order_exits_1(email_file, capsys):
-    code = cli.main([str(email_file)], llm=FakeLLM({**ORDER, "lines": []}))
+    code = cli.main([str(email_file)], llm=SyntheticLLM({**ORDER, "lines": []}))
     _, err = capsys.readouterr()
     assert code == cli.EXIT_INVALID
     assert "Invalid order: Green Leaf Café" in err
@@ -74,7 +74,7 @@ def test_invalid_order_exits_1(email_file, capsys):
 
 
 def test_unreadable_model_output(email_file, capsys):
-    code = cli.main([str(email_file)], llm=FakeLLM("not json"))
+    code = cli.main([str(email_file)], llm=SyntheticLLM("not json"))
     out, err = capsys.readouterr()
     assert code == cli.EXIT_INVALID
     assert json.loads(out)["order"] is None
@@ -89,7 +89,7 @@ def test_unreadable_model_output(email_file, capsys):
     ],
 )
 def test_input_errors_exit_2(tmp_path, capsys, setup, message):
-    code = cli.main([str(setup(tmp_path))], llm=FakeLLM(ORDER))
+    code = cli.main([str(setup(tmp_path))], llm=SyntheticLLM(ORDER))
     out, err = capsys.readouterr()
     assert code == cli.EXIT_FAILED
     assert out == ""
@@ -97,7 +97,7 @@ def test_input_errors_exit_2(tmp_path, capsys, setup, message):
 
 
 def test_llm_error_exits_2(email_file, capsys):
-    code = cli.main([str(email_file)], llm=FakeLLM(LLMError("AuthenticationError: bad key")))
+    code = cli.main([str(email_file)], llm=SyntheticLLM(LLMError("AuthenticationError: bad key")))
     assert code == cli.EXIT_FAILED
     assert "error: AuthenticationError: bad key" in capsys.readouterr().err
 
@@ -114,7 +114,7 @@ def test_provider_and_model_overrides(email_file, monkeypatch):
 
     def fake_build(settings):
         seen["settings"] = settings
-        return ExtractOrder(FakeLLM(ORDER))
+        return ExtractOrder(SyntheticLLM(ORDER))
 
     monkeypatch.setattr(cli, "load_settings", lambda: Settings())
     monkeypatch.setattr(cli, "build_extract_order", fake_build)
@@ -125,5 +125,5 @@ def test_provider_and_model_overrides(email_file, monkeypatch):
 
 def test_bad_today_is_a_usage_error(email_file):
     with pytest.raises(SystemExit) as info:
-        cli.main([str(email_file), "--today", "Thursday"], llm=FakeLLM(ORDER))
+        cli.main([str(email_file), "--today", "Thursday"], llm=SyntheticLLM(ORDER))
     assert info.value.code == 2

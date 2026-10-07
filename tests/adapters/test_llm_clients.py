@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 from order_extractor.adapters.llm.litellm_client import LiteLLMClient, strip_code_fences
-from order_extractor.adapters.llm.fake import FakeLLM
+from order_extractor.adapters.llm.fake import SyntheticLLM
 from order_extractor.application.errors import LLMError
 from order_extractor.application.ports import LLMResponse
 from order_extractor.config import Settings
@@ -12,30 +12,30 @@ ORDER_JSON = '{"lines": [{"product": "Widgets", "quantity": 10}]}'
 SCHEMA = {"type": "object", "properties": {"lines": {"type": "array"}}, "additionalProperties": False}
 
 @pytest.fixture
-def mock_acompletion():
-    with patch("litellm.acompletion", new_callable=AsyncMock) as mock:
-        yield mock
+def simulator_acompletion():
+    with patch("litellm.acompletion", new_callable=AsyncMock) as simulator:
+        yield simulator
 
 def make_completion(content=ORDER_JSON, input_tokens=120, output_tokens=30, refusal=None):
-    mock_resp = MagicMock()
-    mock_resp.model = "gpt-4o-mini-2024-07-18"
-    mock_message = MagicMock()
-    mock_message.content = content
-    mock_message.refusal = refusal
-    mock_resp.choices = [MagicMock(message=mock_message)]
+    simulator_resp = MagicMock()
+    simulator_resp.model = "gpt-4o-mini-2024-07-18"
+    simulator_message = MagicMock()
+    simulator_message.content = content
+    simulator_message.refusal = refusal
+    simulator_resp.choices = [MagicMock(message=simulator_message)]
     if input_tokens is not None:
-        mock_resp.usage = MagicMock(prompt_tokens=input_tokens, completion_tokens=output_tokens)
+        simulator_resp.usage = MagicMock(prompt_tokens=input_tokens, completion_tokens=output_tokens)
     else:
-        mock_resp.usage = None
-    return mock_resp
+        simulator_resp.usage = None
+    return simulator_resp
 
-async def test_structured_output_request(mock_acompletion):
-    mock_acompletion.return_value = make_completion()
+async def test_structured_output_request(simulator_acompletion):
+    simulator_acompletion.return_value = make_completion()
     client = LiteLLMClient(provider="openai", model="gpt-4o-mini")
     response = await client.extract("SYSTEM", "USER", SCHEMA)
     
-    mock_acompletion.assert_called_once()
-    kwargs = mock_acompletion.call_args.kwargs
+    simulator_acompletion.assert_called_once()
+    kwargs = simulator_acompletion.call_args.kwargs
     assert kwargs["model"] == "gpt-4o-mini"
     assert kwargs["temperature"] == 0.0
     assert kwargs["messages"] == [
@@ -51,30 +51,30 @@ async def test_structured_output_request(mock_acompletion):
     assert response.input_tokens == 120
     assert response.output_tokens == 30
 
-async def test_json_only_fallback_puts_schema_in_prompt(mock_acompletion):
-    mock_acompletion.return_value = make_completion()
+async def test_json_only_fallback_puts_schema_in_prompt(simulator_acompletion):
+    simulator_acompletion.return_value = make_completion()
     client = LiteLLMClient(provider="openai", model="gpt-4o-mini", structured_output=False)
     await client.extract("SYSTEM", "USER", SCHEMA)
     
-    kwargs = mock_acompletion.call_args.kwargs
+    kwargs = simulator_acompletion.call_args.kwargs
     assert "response_format" not in kwargs
     system = kwargs["messages"][0]["content"]
     assert system.startswith("SYSTEM\n\nJSON schema:\n")
 
-async def test_temperature_none_is_omitted(mock_acompletion):
-    mock_acompletion.return_value = make_completion()
+async def test_temperature_none_is_omitted(simulator_acompletion):
+    simulator_acompletion.return_value = make_completion()
     client = LiteLLMClient(provider="openai", model="gpt-4o-mini", temperature=None)
     await client.extract("S", "U", SCHEMA)
-    assert "temperature" not in mock_acompletion.call_args.kwargs
+    assert "temperature" not in simulator_acompletion.call_args.kwargs
 
-async def test_empty_content_raises_llm_error(mock_acompletion):
-    mock_acompletion.return_value = make_completion(content="")
+async def test_empty_content_raises_llm_error(simulator_acompletion):
+    simulator_acompletion.return_value = make_completion(content="")
     client = LiteLLMClient(provider="openai", model="gpt-4o-mini")
     with pytest.raises(LLMError, match="empty"):
         await client.extract("S", "U", SCHEMA)
 
-async def test_litellm_exception_raises_llm_error(mock_acompletion):
-    mock_acompletion.side_effect = Exception("connection reset")
+async def test_litellm_exception_raises_llm_error(simulator_acompletion):
+    simulator_acompletion.side_effect = Exception("connection reset")
     client = LiteLLMClient(provider="openai", model="gpt-4o-mini")
     with pytest.raises(LLMError, match="connection reset"):
         await client.extract("S", "U", SCHEMA)
@@ -92,10 +92,10 @@ async def test_litellm_exception_raises_llm_error(mock_acompletion):
 def test_strip_code_fences(raw, expected):
     assert strip_code_fences(raw) == expected
 
-# --- FakeLLM ---
+# --- SyntheticLLM ---
 
 async def test_fake_llm_returns_responses_in_order_then_repeats_last():
-    fake = FakeLLM({"lines": []}, "not json")
+    fake = SyntheticLLM({"lines": []}, "not json")
     first = await fake.extract("S", "U1", SCHEMA)
     second = await fake.extract("S", "U2", SCHEMA)
     third = await fake.extract("S", "U3", SCHEMA)
@@ -103,7 +103,7 @@ async def test_fake_llm_returns_responses_in_order_then_repeats_last():
     assert second.text == third.text == "not json"
 
 async def test_fake_llm_raises_canned_exception():
-    fake = FakeLLM(LLMError("rate limited"))
+    fake = SyntheticLLM(LLMError("rate limited"))
     with pytest.raises(LLMError, match="rate limited"):
         await fake.extract("S", "U", SCHEMA)
 

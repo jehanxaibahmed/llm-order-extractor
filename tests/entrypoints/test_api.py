@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from order_extractor import __version__
-from order_extractor.adapters.llm import FakeLLM
+from order_extractor.adapters.llm import SyntheticLLM
 from order_extractor.application.errors import LLMError
 from order_extractor.application.extract_order import ExtractOrder
 from order_extractor.config import ConfigError
@@ -32,7 +32,7 @@ EMAIL = "Please send 10 boxes of red peppers on Thursday 8th. PO-7781. Fresh Far
 
 @pytest.fixture
 def fake_llm():
-    return FakeLLM(ORDER)
+    return SyntheticLLM(ORDER)
 
 
 @pytest.fixture
@@ -126,7 +126,7 @@ def test_extract_file_requires_a_file(client):
 def test_llm_failure_is_502():
     app = api.create_app()
     app.dependency_overrides[api.get_extract_order] = lambda: ExtractOrder(
-        FakeLLM(LLMError("RateLimitError: slow down"))
+        SyntheticLLM(LLMError("RateLimitError: slow down"))
     )
     response = TestClient(app).post("/extract/text", json={"text": EMAIL})
     assert response.status_code == 502

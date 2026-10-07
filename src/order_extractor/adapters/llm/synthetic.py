@@ -1,4 +1,4 @@
-"""FakeLLM: returns canned responses so tests and demos run without an API key."""
+"""SyntheticLLM: returns canned responses so tests and showcases run without an API key."""
 
 import json
 from dataclasses import dataclass
@@ -16,7 +16,7 @@ class FakeCall:
     schema: dict[str, Any]
 
 
-class FakeLLM:
+class SyntheticLLM:
     """Implements the ``LLMClient`` port.
 
     Each call returns the next canned response; the last one repeats once the list runs out.
@@ -26,7 +26,7 @@ class FakeLLM:
 
     def __init__(self, *responses: Canned, model: str = "fake-llm") -> None:
         if not responses:
-            raise ValueError("FakeLLM needs at least one canned response.")
+            raise ValueError("SyntheticLLM needs at least one canned response.")
         self._responses = list(responses)
         self.model = model
         self.calls: list[FakeCall] = []

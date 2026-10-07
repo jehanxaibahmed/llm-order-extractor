@@ -39,7 +39,7 @@ def fake_llm():
 def client(fake_llm):
     app = api.create_app()
     app.dependency_overrides[api.get_extract_order] = lambda: ExtractOrder(fake_llm)
-    return TestClient(app)
+    return TestClient(app, headers={"X-API-Key": "secret-key"})
 
 
 def test_health(client):
@@ -128,7 +128,9 @@ def test_llm_failure_is_502():
     app.dependency_overrides[api.get_extract_order] = lambda: ExtractOrder(
         SyntheticLLM(LLMError("RateLimitError: slow down"))
     )
-    response = TestClient(app).post("/extract/text", json={"text": EMAIL})
+    response = TestClient(app, headers={"X-API-Key": "secret-key"}).post(
+        "/extract/text", json={"text": EMAIL}
+    )
     assert response.status_code == 502
     assert response.json() == {"detail": "RateLimitError: slow down"}
 
@@ -139,7 +141,9 @@ def test_missing_configuration_is_503(monkeypatch):
 
     app = api.create_app()
     app.dependency_overrides[api.get_extract_order] = not_configured
-    response = TestClient(app).post("/extract/text", json={"text": EMAIL})
+    response = TestClient(app, headers={"X-API-Key": "secret-key"}).post(
+        "/extract/text", json={"text": EMAIL}
+    )
     assert response.status_code == 503
     assert "OPENAI_API_KEY" in response.json()["detail"]
 
@@ -155,7 +159,7 @@ def test_unsupported_file_is_415_even_when_llm_not_configured():
 
     app = api.create_app()
     app.dependency_overrides[api.get_extract_order] = not_configured
-    response = TestClient(app).post(
+    response = TestClient(app, headers={"X-API-Key": "secret-key"}).post(
         "/extract/file", files={"file": ("order.docx", b"x", "application/x")}
     )
     assert response.status_code == 415

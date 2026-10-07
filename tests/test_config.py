@@ -6,7 +6,7 @@ from order_extractor.config import ConfigError, Settings
 def test_defaults():
     s = Settings.from_env({})
     assert s.llm_provider == "openai"
-    assert s.llm_model == "gpt-4o-mini"
+    assert s.llm_model == "qwen2.5-coder:14b"
     assert s.timeout_seconds == 30.0
     assert s.max_retries == 2
     assert s.temperature == 0.0
@@ -36,7 +36,7 @@ def test_reads_environment():
 
 def test_blank_values_fall_back_to_defaults():
     s = Settings.from_env({"LLM_MODEL": "  ", "OPENAI_API_KEY": "", "LLM_MAX_RETRIES": ""})
-    assert s.llm_model == "gpt-4o-mini"
+    assert s.llm_model == "qwen2.5-coder:14b"
     assert s.api_key is None
     assert s.max_retries == 2
 

@@ -3,18 +3,21 @@ import re
 from typing import Any
 
 import litellm
-litellm._turn_on_debug()
 
 from order_extractor.adapters.llm.schema import to_strict_schema
 from order_extractor.application.errors import LLMError
 from order_extractor.application.ports import LLMClient, LLMResponse
 
+litellm._turn_on_debug()
+
 _CODE_FENCE = re.compile(r"^```(?:json)?\s*\n(.*?)\n?```$", re.DOTALL)
+
 
 def strip_code_fences(text: str) -> str:
     text = text.strip()
     match = _CODE_FENCE.match(text)
     return match.group(1).strip() if match else text
+
 
 class LiteLLMClient(LLMClient):
     def __init__(
@@ -42,7 +45,7 @@ class LiteLLMClient(LLMClient):
         kwargs: dict[str, Any] = {}
         if self.temperature is not None:
             kwargs["temperature"] = self.temperature
-            
+
         if self.structured_output:
             kwargs["response_format"] = {
                 "type": "json_schema",
@@ -64,7 +67,7 @@ class LiteLLMClient(LLMClient):
             kwargs["api_key"] = self.api_key
         if self.base_url:
             kwargs["api_base"] = self.base_url
-            
+
         # Prefix the model with provider if necessary for litellm.
         # OpenRouter and others might need explicit routing if the model name is ambiguous.
         litellm_model = self.model
@@ -85,7 +88,7 @@ class LiteLLMClient(LLMClient):
                 messages=messages,
                 timeout=self.timeout_seconds,
                 num_retries=self.max_retries,
-                **kwargs
+                **kwargs,
             )
         except Exception as exc:
             raise LLMError(f"{type(exc).__name__}: {exc}") from exc
@@ -93,7 +96,7 @@ class LiteLLMClient(LLMClient):
         if not response.choices:
             raise LLMError("The model returned no choices.")
         message = response.choices[0].message
-        
+
         # In litellm, message is often a litellm.Message object.
         content = message.content
         if not content:

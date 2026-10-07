@@ -160,10 +160,13 @@ def get_upload_parser(file: UploadDep) -> DocumentParser:
 api_key_header = APIKeyHeader(name="X-API-Key")
 
 
-def verify_api_key(api_key: str = Security(api_key_header)) -> str:
-    if api_key != load_settings().api_key_secret:
+def verify_api_key(
+    api_key: str | None = Security(APIKeyHeader(name="X-API-Key", auto_error=False)),
+) -> str:
+    secret = load_settings().api_key_secret
+    if secret and api_key != secret:
         raise HTTPException(status_code=401, detail="Invalid API Key")
-    return api_key
+    return api_key or ""
 
 
 ApiKeyDep = Annotated[str, Depends(verify_api_key)]
@@ -188,6 +191,7 @@ def create_app() -> FastAPI:
     )
 
     from fastapi.middleware.cors import CORSMiddleware
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

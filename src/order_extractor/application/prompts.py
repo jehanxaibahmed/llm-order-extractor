@@ -14,7 +14,9 @@ match it to a catalogue.
 "a few", "some"), give your best numeric reading in quantity and set quantity_is_estimate to \
 true. Otherwise set quantity_is_estimate to false.
 - unit is the packaging or measure as written ("box", "case", "tray", "kg"), or null.
-- Extract the requested delivery date EXACTLY, whether it is relative ("tomorrow") or absolute ("8th October 2026"). You MUST convert it to an ISO date format (YYYY-MM-DD) and place it in requested_delivery_date. Calculate relative dates using the "today" date provided.
+- Extract the requested delivery date EXACTLY, whether it is relative ("tomorrow") \
+or absolute ("8th October 2026"). You MUST convert it to an ISO date format (YYYY-MM-DD) \
+and place it in requested_delivery_date. Calculate relative dates using the "today" date provided.
 - customer_reference is a PO number or order reference if one is given, often in the subject line.
 - customer_name is the ordering business (or person, if no business is named), not the supplier.
 - If the document contains no order, return an empty lines list.

@@ -3,6 +3,7 @@ import re
 from typing import Any
 
 import litellm
+litellm._turn_on_debug()
 
 from order_extractor.adapters.llm.schema import to_strict_schema
 from order_extractor.application.errors import LLMError

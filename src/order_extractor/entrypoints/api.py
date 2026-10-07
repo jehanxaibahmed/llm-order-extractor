@@ -8,9 +8,10 @@ from datetime import date
 from functools import lru_cache
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Security, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict, Field
 
 from order_extractor import __version__
@@ -156,6 +157,18 @@ def get_upload_parser(file: UploadDep) -> DocumentParser:
     return get_parser(file.filename or "")
 
 
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+
+def verify_api_key(api_key: str = Security(api_key_header)) -> str:
+    if api_key != load_settings().api_key_secret:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return api_key
+
+
+ApiKeyDep = Annotated[str, Depends(verify_api_key)]
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="LLM Order Extractor",
@@ -174,6 +187,15 @@ def create_app() -> FastAPI:
         },
     )
 
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
         return RedirectResponse("/docs")
@@ -187,6 +209,7 @@ def create_app() -> FastAPI:
         tags=["extraction"],
         summary="Extract an order from text",
         responses={**RESULT_RESPONSE, **LLM_RESPONSES},
+        dependencies=[Depends(verify_api_key)],
     )
     async def extract_text(body: ExtractTextRequest, extract: ExtractOrderDep) -> ExtractionResult:
         """Paste the body of an order email. The text is sent to the configured LLM."""
@@ -197,6 +220,7 @@ def create_app() -> FastAPI:
         tags=["extraction"],
         summary="Extract an order from a file",
         responses={**RESULT_RESPONSE, **FILE_RESPONSES, **LLM_RESPONSES},
+        dependencies=[Depends(verify_api_key)],
     )
     async def extract_file(
         file: UploadDep,

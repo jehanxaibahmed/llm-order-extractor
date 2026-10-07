@@ -35,6 +35,7 @@ class Settings:
     """Use JSON-schema structured outputs. Off by default for OpenRouter and Ollama."""
     llm_base_url: str | None = None
     """Override the provider's API base URL (any OpenAI-compatible endpoint)."""
+    api_key_secret: str = "secret-key"
 
     @property
     def api_key(self) -> str | None:
@@ -73,7 +74,8 @@ class Settings:
             if env.text("LLM_TEMPERATURE") == "none"
             else env.number("LLM_TEMPERATURE", float, DEFAULT_TEMPERATURE),
             structured_output=env.flag("LLM_STRUCTURED_OUTPUT", default=provider == "openai"),
-            llm_base_url=env.text("LLM_BASE_URL"),
+            llm_base_url=env.text("LLM_BASE_URL") or "http://localhost:5080/v1",
+            api_key_secret=env.text("API_KEY") or "secret-key",
         )
 
 
